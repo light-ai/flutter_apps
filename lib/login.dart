@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/main.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_app/chatPage.dart';
+import 'package:flutter_app/addPost.dart';
 
 // ログイン画面用Widget
 class LoginPage extends StatefulWidget {
@@ -102,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                       await Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) {
                           // ユーザー情報を渡す
-                          UserState().setUser(user);
+                          //UserState().setUser(user);
                           return ChatPage(user);
                         }),
                       );
@@ -132,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                       await Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) {
                           // ユーザー情報を渡す
-                          UserState().setUser(user);
+                          //UserState().setUser(user);
                           return ChatPage(user);
                         }),
                       );

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/profile.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
+import 'package:flutter_app/profile.dart';
 
 //チャット投稿用ウィジェット
 class AddPostPage extends StatefulWidget {
@@ -72,6 +74,15 @@ class _AddPostPageState extends State<AddPostPage> {
                   MaterialPageRoute(builder: (context) {
                     // 引数からユーザー情報を渡す
                     return CalenderExample();
+                  }),
+                );
+              },
+              ),
+              FloatingActionButton(onPressed: (){
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) {
+                    // 引数からユーザー情報を渡す
+                    return ProfilePage(widget.user);
                   }),
                 );
               },

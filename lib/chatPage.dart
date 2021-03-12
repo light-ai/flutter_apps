@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/addPost.dart';
@@ -11,9 +12,15 @@ class ChatPage extends StatelessWidget {
   // 引数からユーザー情報を受け取れるようにする
   ChatPage(this.user);
   // ユーザー情報
-  final FirebaseUser user;
+  final User user;
+
+  void UserInfo(user){
+    UserModel(this.user);
+  }
+
   @override
   Widget build(BuildContext context) {
+    UserInfo(this.user);
     return Scaffold(
       appBar: AppBar(
         title: Text('チャット'),
@@ -47,7 +54,7 @@ class ChatPage extends StatelessWidget {
             child: StreamBuilder<QuerySnapshot>(
               // 投稿メッセージ一覧を取得（非同期処理）
               // 投稿日時でソート
-              stream: Firestore.instance
+              stream: FirebaseFirestore.instance
                   .collection('posts')
                   .orderBy('date')
                   .snapshots(),
@@ -55,7 +62,7 @@ class ChatPage extends StatelessWidget {
                 // データが取得できた場合
                 if (snapshot.hasData) {
                   final List<DocumentSnapshot> documents =
-                      snapshot.data.documents;
+                      snapshot.data.docs;
                   // 取得した投稿メッセージ一覧を元にリスト表示
                   return ListView(
                     children: documents.map((document) {
@@ -66,9 +73,9 @@ class ChatPage extends StatelessWidget {
                           icon: Icon(Icons.delete),
                           onPressed: () async {
                             // 投稿メッセージのドキュメントを削除
-                            await Firestore.instance
+                            await FirebaseFirestore.instance
                                 .collection('posts')
-                                .document(document.documentID)
+                                .doc(document.id)
                                 .delete();
                           },
                         );

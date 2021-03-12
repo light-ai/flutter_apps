@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/chatPage.dart';
 import 'package:flutter_app/addPost.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // ログイン画面用Widget
 class LoginPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<FirebaseUser> _handleSignIn() async {
+  Future<User> _handleSignIn() async {
     GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
     try {
       if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
@@ -33,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+      final User user = (await _auth.signInWithCredential(credential)).user;
       print("signed in " + user.displayName);
 
       return user;
@@ -43,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void transitionNextPage(FirebaseUser user) {
+  void transitionNextPage(User user) {
     if (user == null) return;
 
     Navigator.push(context, MaterialPageRoute(builder: (context) =>
@@ -94,11 +95,15 @@ class _LoginPageState extends State<LoginPage> {
                     try {
                       // メール/パスワードでユーザー登録
                       final FirebaseAuth auth = FirebaseAuth.instance;
-                      final AuthResult result = await auth.createUserWithEmailAndPassword(
+                      final UserCredential result = await auth.createUserWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
                       final FirebaseUser user = result.user;
+                      Firestore.instance.collection('users').document(user.email).setData(
+                          {
+                            'id': user.email
+                          });
                       // ユーザー登録に成功した場合
                       // チャット画面に遷移＋ログイン画面を破棄
                       await Navigator.of(context).pushReplacement(
@@ -124,11 +129,15 @@ class _LoginPageState extends State<LoginPage> {
                     try {
                       // メール/パスワードでログイン
                       final FirebaseAuth auth = FirebaseAuth.instance;
-                      final AuthResult result = await auth.signInWithEmailAndPassword(
+                      final UserCredential result = await auth.signInWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
-                      final FirebaseUser user = result.user;
+                      final User user = result.user;
+
+                      FirebaseFirestore.instance.collection('users').document(user.email).setData({
+                            'id': user.email
+                          });
                       // ログインに成功した場合
                       // チャット画面に遷移＋ログイン画面を破棄
                       await Navigator.of(context).pushReplacement(
@@ -147,11 +156,11 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 width: double.infinity,
                 // ユーザー登録ボタン
-                child:RaisedButton(
+                child:ElevatedButton(
                   child: Text('Sign in Google'),
                   onPressed: () {
                     _handleSignIn()
-                        .then((FirebaseUser user) =>
+                        .then((User user) =>
                         transitionNextPage(user)
                     )
                         .catchError((e) => print(e));
@@ -179,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<FirebaseUser> _handleSignIn() async {
+  Future<User> _handleSignIn() async {
     GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
     try {
       if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
@@ -187,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (googleCurrentUser == null) return null;
 
       GoogleSignInAuthentication googleAuth = await googleCurrentUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
@@ -201,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void transitionNextPage(FirebaseUser user) {
+  void transitionNextPage(User user) {
     if (user == null) return;
 
     Navigator.push(context, MaterialPageRoute(builder: (context) =>
@@ -223,7 +232,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text('Sign in Google'),
                 onPressed: () {
                   _handleSignIn()
-                      .then((FirebaseUser user) =>
+                      .then((User user) =>
                       transitionNextPage(user)
                   )
                       .catchError((e) => print(e));

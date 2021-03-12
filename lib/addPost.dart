@@ -10,7 +10,7 @@ import 'package:flutter_app/profile.dart';
 //チャット投稿用ウィジェット
 class AddPostPage extends StatefulWidget {
   // ユーザー情報
-  final FirebaseUser user;
+  final User user;
   // 引数からユーザー情報を受け取る
   AddPostPage(this.user);
   @override
@@ -69,7 +69,9 @@ class _AddPostPageState extends State<AddPostPage> {
                   },
                 ),
               ),
-              FloatingActionButton(onPressed: (){
+              FloatingActionButton(
+                heroTag: 'hero1',
+                onPressed: (){
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) {
                     // 引数からユーザー情報を渡す
@@ -78,7 +80,9 @@ class _AddPostPageState extends State<AddPostPage> {
                 );
               },
               ),
-              FloatingActionButton(onPressed: (){
+              FloatingActionButton(
+                heroTag: 'hero2',
+                onPressed: (){
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) {
                     // 引数からユーザー情報を渡す

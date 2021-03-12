@@ -1,14 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/user.dart';
+import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/addPost.dart';
 
 class ProfilePage extends StatefulWidget {
   // ユーザー情報
-  final FirebaseUser user;
+  final User user;
   // 引数からユーザー情報を受け取る
   ProfilePage(this.user);
 
@@ -17,20 +20,22 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePage extends State<ProfilePage>{
   _ProfilePage(this.user);
-  final FirebaseUser user;
+  final User user;
   bool isFollowing = false;
   bool followButtonClicked = false;
+  ScheduleUser follow;
 
   followUser() {
+    final profileUserId = user.email;
     print('following user');
     setState(() {
       this.isFollowing = true;
       followButtonClicked = true;
     });
 
-    Firestore.instance.collection('users').document(user.email).setData({
+    FirebaseFirestore.instance.collection('users').document(user.email).setData({
       'followers': true,
-      'following': true
+      'following_$profileUserId': true
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
 
@@ -49,26 +54,26 @@ class _ProfilePage extends State<ProfilePage>{
   }
 
   unfollowUser() {
+    final profileUserId = user.email;
     setState(() {
       isFollowing = false;
       followButtonClicked = true;
     });
 
-    Firestore.instance.collection('users').document(user.email).updateData({
+    Firestore.instance.collection('users').document(user.email).setData({
       'followers': false,
-      'following': false
+      'following_$profileUserId': false
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
+    }
 
-    Firestore.instance
+    /* Firestore.instance
         .collection("users")
         .document('profile')
-        .delete();
-  }
+        .delete();*/
 
-  @override
-  Widget build(BuildContext context) {
-    if (isFollowing) {
+  Follow(dynamic snapshot){
+    if (snapshot) {
       return RaisedButton(
         child: const Text('Remove'),
         color: Colors.red,
@@ -78,8 +83,7 @@ class _ProfilePage extends State<ProfilePage>{
         },
       );
     }
-    // does not follow user - should show follow button
-    if (!isFollowing) {
+    else if (!snapshot) {
       return RaisedButton(
         child: const Text('Follow'),
         color: Colors.red,
@@ -88,7 +92,21 @@ class _ProfilePage extends State<ProfilePage>{
           followUser();
         },
       );
+    }else{
+      return Center(
+        child: Text('読み込み中です'),
+      );
     }
-
   }
-}
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.email).snapshots(),
+      builder: (context, snapshot) {
+        return Follow(snapshot.data['followers']);
+      },
+    );
+  }
+  }
+
+

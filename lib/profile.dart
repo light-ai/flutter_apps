@@ -65,32 +65,51 @@ class _ProfilePage extends State<ProfilePage>{
       'following_$profileUserId': false
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
-    }
+  }
 
-    /* Firestore.instance
+  /* Firestore.instance
         .collection("users")
         .document('profile')
         .delete();*/
 
   Follow(dynamic snapshot){
     if (snapshot) {
-      return RaisedButton(
-        child: const Text('Remove'),
-        color: Colors.red,
-        shape: const StadiumBorder(),
-        onPressed: () {
-          unfollowUser();
-        },
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('プロフィ-ル'),
+        ),
+        body: Column(
+          children: <Widget>[
+            RaisedButton(
+              child: const Text('Remove'),
+              color: Colors.red,
+              shape: const StadiumBorder(),
+              onPressed: () {
+                unfollowUser();
+              },
+            ),
+          ],
+        ),
       );
+
     }
     else if (!snapshot) {
-      return RaisedButton(
-        child: const Text('Follow'),
-        color: Colors.red,
-        shape: const StadiumBorder(),
-        onPressed: () {
-          followUser();
-        },
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('プロフィ-ル'),
+        ),
+        body: Column(
+          children: <Widget>[
+            RaisedButton(
+              child: const Text('Follow'),
+              color: Colors.red,
+              shape: const StadiumBorder(),
+              onPressed: () {
+                followUser();
+              },
+            ),
+          ],
+        ),
       );
     }else{
       return Center(
@@ -107,6 +126,6 @@ class _ProfilePage extends State<ProfilePage>{
       },
     );
   }
-  }
+}
 
 

@@ -24,6 +24,7 @@ class _ProfilePage extends State<ProfilePage>{
   bool isFollowing = false;
   bool followButtonClicked = false;
   ScheduleUser follow;
+  User currentUser = FirebaseAuth.instance.currentUser;
 
   followUser() {
     final profileUserId = user.email;
@@ -60,7 +61,7 @@ class _ProfilePage extends State<ProfilePage>{
       followButtonClicked = true;
     });
 
-    Firestore.instance.collection('users').document(user.email).setData({
+    FirebaseFirestore.instance.collection('users').doc(user.email).set({
       'followers': false,
       'following_$profileUserId': false
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
@@ -76,10 +77,16 @@ class _ProfilePage extends State<ProfilePage>{
     if (snapshot) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('プロフィ-ル'),
+          title: Text('プロフィール'),
         ),
-        body: Column(
+        body: Row(
           children: <Widget>[
+            CircleAvatar(
+              backgroundImage: NetworkImage(
+                  currentUser.photoURL
+              ),
+            ),
+            Text(currentUser.displayName),
             RaisedButton(
               child: const Text('Remove'),
               color: Colors.red,
@@ -96,10 +103,16 @@ class _ProfilePage extends State<ProfilePage>{
     else if (!snapshot) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('プロフィ-ル'),
+          title: Text('プロフィール'),
         ),
-        body: Column(
+        body: Row(
           children: <Widget>[
+            CircleAvatar(
+              backgroundImage: NetworkImage(
+                  currentUser.photoURL
+              ),
+            ),
+            Text(currentUser.displayName),
             RaisedButton(
               child: const Text('Follow'),
               color: Colors.red,
@@ -127,5 +140,3 @@ class _ProfilePage extends State<ProfilePage>{
     );
   }
 }
-
-

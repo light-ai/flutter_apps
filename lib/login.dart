@@ -99,8 +99,8 @@ class _LoginPageState extends State<LoginPage> {
                         email: email,
                         password: password,
                       );
-                      final FirebaseUser user = result.user;
-                      Firestore.instance.collection('users').document(user.email).setData(
+                      final User user = result.user;
+                      FirebaseFirestore.instance.collection('users').doc(user.email).set(
                           {
                             'id': user.email
                           });
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                       final User user = result.user;
 
-                      FirebaseFirestore.instance.collection('users').document(user.email).setData({
+                      FirebaseFirestore.instance.collection('users').doc(user.email).set({
                             'id': user.email
                           });
                       // ログインに成功した場合
@@ -169,76 +169,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  Future<User> _handleSignIn() async {
-    GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
-    try {
-      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
-      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signIn();
-      if (googleCurrentUser == null) return null;
-
-      GoogleSignInAuthentication googleAuth = await googleCurrentUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-      print("signed in " + user.displayName);
-
-      return user;
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  void transitionNextPage(User user) {
-    if (user == null) return;
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) =>
-        ChatPage(user)
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              RaisedButton(
-                child: Text('Sign in Google'),
-                onPressed: () {
-                  _handleSignIn()
-                      .then((User user) =>
-                      transitionNextPage(user)
-                  )
-                      .catchError((e) => print(e));
-                },
-              ),
-            ]
         ),
       ),
     );

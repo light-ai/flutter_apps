@@ -8,9 +8,10 @@ class UserModel{
   UserModel(this.user);
   final User user;
   ScheduleUser userModel;
+  User currentUser = FirebaseAuth.instance.currentUser;
 
   Future fetchUser() async{
-    final data = FirebaseFirestore.instance.collection('users').doc(user.email);
+    final data = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
     final dataSnapshot = await data.get();
     this.userModel = ScheduleUser(dataSnapshot, this.user);
   }

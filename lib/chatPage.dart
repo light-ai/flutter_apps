@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/profile.dart';
 import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
@@ -13,6 +14,7 @@ class ChatPage extends StatelessWidget {
   ChatPage(this.user);
   // ユーザー情報
   final User user;
+  User currentUser = FirebaseAuth.instance.currentUser;
 
   void UserInfo(user){
     UserModel(this.user);
@@ -81,10 +83,23 @@ class ChatPage extends StatelessWidget {
                         );
                       }
                       return Card(
-                        child: ListTile(
+                        child:
+                        ListTile(
                           title: Text(document['text']),
                           subtitle: Text(document['email']),
-                          trailing: deleteIcon,
+                          onTap: () => {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (context) {
+                                // 引数からユーザー情報を渡す
+                                return ProfilePage(this.user);
+                              }),
+                            ),
+                          },
+                          trailing: CircleAvatar(
+                            backgroundImage: NetworkImage(
+                                currentUser.photoURL
+                            ),
+                          ),
                         ),
                       );
                     }).toList(),

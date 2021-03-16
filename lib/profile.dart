@@ -10,34 +10,32 @@ import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/addPost.dart';
 
 class ProfilePage extends StatefulWidget {
-  // ユーザー情報
-  final User user;
-  // 引数からユーザー情報を受け取る
-  ProfilePage(this.user);
-
-  _ProfilePage createState() => _ProfilePage(this.user);
+  ProfilePage(this.profileId);
+  String profileId;
+  _ProfilePage createState() => _ProfilePage(profileId);
 }
 
 class _ProfilePage extends State<ProfilePage>{
-  _ProfilePage(this.user);
-  final User user;
+  _ProfilePage(this.profileId);
+  String profileId;
   bool isFollowing = false;
   bool followButtonClicked = false;
   ScheduleUser follow;
   User currentUser = FirebaseAuth.instance.currentUser;
 
   followUser() {
-    final profileUserId = user.email;
-    print('following user');
+    final profileUserId = currentUser.email;
     setState(() {
       this.isFollowing = true;
       followButtonClicked = true;
     });
-
-    FirebaseFirestore.instance.collection('users').document(user.email).setData({
-      'followers': true,
-      'following_$profileUserId': true
+    FirebaseFirestore.instance.collection('users').doc(currentUser.email).update({
+      'following': true,
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
+    });
+
+    FirebaseFirestore.instance.collection('users').doc(profileId).update({
+      'followers': true
     });
 
     //updates activity feed
@@ -54,18 +52,59 @@ class _ProfilePage extends State<ProfilePage>{
     });*/
   }
 
+  followUsers() {
+    final profileUserId = currentUser.email;
+    print('following user');
+    setState(() {
+      this.isFollowing = true;
+      followButtonClicked = true;
+    });
+    FirebaseFirestore.instance.collection('users')
+        .doc(currentUser.email)
+        .set({
+      'following.$profileId': false,
+      //firestore plugin doesnt support deleting, so it must be nulled / falsed
+    });
+
+    FirebaseFirestore.instance.collection('users').doc(profileId).set({
+      'followers.$profileUserId': false
+    });
+  }
+
   unfollowUser() {
-    final profileUserId = user.email;
+    final profileUserId = currentUser.email;
     setState(() {
       isFollowing = false;
       followButtonClicked = true;
     });
-
-    FirebaseFirestore.instance.collection('users').doc(user.email).set({
-      'followers': false,
-      'following_$profileUserId': false
+    FirebaseFirestore.instance.collection('users').doc(currentUser.email).update({
+      'following': false,
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
+
+    FirebaseFirestore.instance.collection('users').doc(profileId).update({
+      'followers': false
+    });
+  }
+
+  unfollowUsers() {
+    final profileUserId = currentUser.email;
+    setState(() {
+      isFollowing = false;
+      followButtonClicked = true;
+    });
+    FirebaseFirestore.instance.collection('users').doc(currentUser.email).set({
+      'following.$profileId': false,
+      //firestore plugin doesnt support deleting, so it must be nulled / falsed
+    });
+
+    FirebaseFirestore.instance.collection('users').doc(profileId).set({
+      'followers.$profileUserId': false
+    });
+  }
+
+  void GetInfo(DocumentSnapshot documentSnapshot) async{
+    documentSnapshot = await FirebaseFirestore.instance.collection('users').doc(currentUser.email)/*.collection('follow').doc(profileId)*/.get();
   }
 
   /* Firestore.instance
@@ -83,10 +122,10 @@ class _ProfilePage extends State<ProfilePage>{
           children: <Widget>[
             CircleAvatar(
               backgroundImage: NetworkImage(
-                  currentUser.photoURL
+                  snapshot.data['photoUrl']
               ),
             ),
-            Text(currentUser.displayName),
+            Text(snapshot.data['text']),
             RaisedButton(
               child: const Text('Remove'),
               color: Colors.red,
@@ -98,7 +137,6 @@ class _ProfilePage extends State<ProfilePage>{
           ],
         ),
       );
-
     }
     else if (!snapshot) {
       return Scaffold(
@@ -109,10 +147,10 @@ class _ProfilePage extends State<ProfilePage>{
           children: <Widget>[
             CircleAvatar(
               backgroundImage: NetworkImage(
-                  currentUser.photoURL
+                  snapshot.data['photoUrl']
               ),
             ),
-            Text(currentUser.displayName),
+            Text(snapshot.data['text']),
             RaisedButton(
               child: const Text('Follow'),
               color: Colors.red,
@@ -132,10 +170,66 @@ class _ProfilePage extends State<ProfilePage>{
   }
   @override
   Widget build(BuildContext context) {
+    String email = currentUser.email;
+    QueryDocumentSnapshot documentSnapshot;
+    GetInfo(documentSnapshot);
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('users').doc(user.email).snapshots(),
+      stream: FirebaseFirestore.instance.collection('users').doc(profileId).snapshots(),
       builder: (context, snapshot) {
-        return Follow(snapshot.data['followers']);
+        if (snapshot.data['followers']) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('プロフィール'),
+            ),
+            body: Row(
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: NetworkImage(
+                      snapshot.data['photoUrl']
+                  ),
+                ),
+                Text(snapshot.data['text']),
+                RaisedButton(
+                  child: const Text('Remove'),
+                  color: Colors.red,
+                  shape: const StadiumBorder(),
+                  onPressed: () {
+                    unfollowUser();
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+        else if (!snapshot.data['followers']) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('プロフィール'),
+            ),
+            body: Row(
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: NetworkImage(
+                      snapshot.data['photoUrl']
+                  ),
+                ),
+                Text(snapshot.data['text']),
+                RaisedButton(
+                  child: const Text('Follow'),
+                  color: Colors.red,
+                  shape: const StadiumBorder(),
+                  onPressed: () {
+                    followUser();
+                  },
+                ),
+              ],
+            ),
+          );
+        }else{
+          return Center(
+            child: Text('読み込み中です'),
+          );
+        }
       },
     );
   }

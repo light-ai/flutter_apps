@@ -5,9 +5,10 @@ class ScheduleUser{
   final User user;
   ScheduleUser(DocumentSnapshot doc, this.user){
     this.id = doc.id;
-    this.following = doc.data()['following_' + user.email.toString()];
+    this.following = doc.data()['following_' + user.email];
     this.followed = doc.data()['followers'];
     this.id = doc.data()['name'];
+
   }
   String id;
   bool following;

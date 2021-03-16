@@ -14,10 +14,12 @@ class AddPostPage extends StatefulWidget {
   // 引数からユーザー情報を受け取る
   AddPostPage(this.user);
   @override
-  _AddPostPageState createState() => _AddPostPageState();
+  _AddPostPageState createState() => _AddPostPageState(this.user);
 }
 
 class _AddPostPageState extends State<AddPostPage> {
+  _AddPostPageState(this.user);
+  final User user;
   // 入力した投稿メッセージ
   String messageText = '';
   @override
@@ -62,7 +64,8 @@ class _AddPostPageState extends State<AddPostPage> {
                         .setData({
                       'text': messageText,
                       'email': email,
-                      'date': date
+                      'date': date,
+                      'photoUrl': this.user.photoURL
                     });
                     // 1つ前の画面に戻る
                     Navigator.of(context).pop();
@@ -86,7 +89,7 @@ class _AddPostPageState extends State<AddPostPage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) {
                     // 引数からユーザー情報を渡す
-                    return ProfilePage(widget.user);
+                    return ProfilePage(user.email);
                   }),
                 );
               },

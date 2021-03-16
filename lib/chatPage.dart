@@ -85,21 +85,22 @@ class ChatPage extends StatelessWidget {
                       return Card(
                         child:
                         ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(
+                                document['photoUrl']
+                            ),
+                          ),
+                          trailing: deleteIcon,
                           title: Text(document['text']),
                           subtitle: Text(document['email']),
                           onTap: () => {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (context) {
                                 // 引数からユーザー情報を渡す
-                                return ProfilePage(this.user);
+                                  return ProfilePage(document['email']);
                               }),
                             ),
                           },
-                          trailing: CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                currentUser.photoURL
-                            ),
-                          ),
                         ),
                       );
                     }).toList(),

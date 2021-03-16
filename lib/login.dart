@@ -37,6 +37,58 @@ class _LoginPageState extends State<LoginPage> {
       final User user = (await _auth.signInWithCredential(credential)).user;
       print("signed in " + user.displayName);
 
+      await FirebaseFirestore.instance
+          .collection('users') // コレクションID指定
+          .doc(user.email) // ドキュメントID自動生成
+          .set({
+        'text': user.displayName,
+        'email': user.email,
+        'photoUrl': user.photoURL,
+        'followers': false
+      });
+
+      return user;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<User> _handleSignIn2() async {
+    GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
+    try {
+      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
+      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signIn();
+      if (googleCurrentUser == null) return null;
+
+      GoogleSignInAuthentication googleAuth = await googleCurrentUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final User user = (await _auth.signInWithCredential(credential)).user;
+      print("signed in " + user.displayName);
+
+      await FirebaseFirestore.instance
+          .collection('users') // コレクションID指定
+          .doc(user.email) // ドキュメントID自動生成
+          .update({
+        'text': user.displayName,
+        'email': user.email,
+        'photoUrl': user.photoURL,
+        'following': false,
+        'followers': false
+      });
+
+      /*await FirebaseFirestore.instance
+          .collection('users') // コレクションID指定
+          .doc(user.email)
+          .collection('follow')
+          .doc(user.email)
+          .set({
+
+      });*/
+
       return user;
     } catch (e) {
       print(e);
@@ -157,9 +209,23 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 // ユーザー登録ボタン
                 child:ElevatedButton(
-                  child: Text('Sign in Google'),
+                  child: Text('新規Sign in Google'),
                   onPressed: () {
                     _handleSignIn()
+                        .then((User user) =>
+                        transitionNextPage(user)
+                    )
+                        .catchError((e) => print(e));
+                  },
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                // ユーザー登録ボタン
+                child:ElevatedButton(
+                  child: Text('Sign in Google'),
+                  onPressed: () {
+                    _handleSignIn2()
                         .then((User user) =>
                         transitionNextPage(user)
                     )

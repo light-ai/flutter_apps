@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/profile_edit.dart';
 import 'package:flutter_app/user.dart';
 import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
@@ -197,6 +198,17 @@ class _ProfilePage extends State<ProfilePage>{
                     unfollowUser();
                   },
                 ),
+                Text(snapshot.data['msg']),
+                OutlinedButton(
+                  child: const Text('Edit Profile'),
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) {
+                        return ProfileEdit();
+                      }),
+                    );
+                  },
+                ),
               ],
             ),
           );
@@ -220,6 +232,17 @@ class _ProfilePage extends State<ProfilePage>{
                   shape: const StadiumBorder(),
                   onPressed: () {
                     followUser();
+                  },
+                ),
+                Text(snapshot.data['msg']),
+                OutlinedButton(
+                  child: const Text('Edit Profile'),
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) {
+                        return ProfileEdit();
+                      }),
+                    );
                   },
                 ),
               ],

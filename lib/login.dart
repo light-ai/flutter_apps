@@ -77,7 +77,8 @@ class _LoginPageState extends State<LoginPage> {
         'email': user.email,
         'photoUrl': user.photoURL,
         'following': false,
-        'followers': false
+        'followers': false,
+        'msg': ''
       });
 
       /*await FirebaseFirestore.instance

@@ -44,6 +44,31 @@ class ChatPage extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.contacts),
+            title: Text('Contacts'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            title: Text('Map'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            title: Text('Chat'),
+          ),
+        ],
+        onTap: (int index) {
+          /*setState(
+                () {
+              _navIndex = index;
+              _label = _titles[index];
+            },
+          );*/
+        },
+        /*currentIndex: _navIndex,*/
+      ),
       body: Column(
         children: <Widget>[
           Container(

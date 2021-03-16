@@ -174,9 +174,38 @@ class _ProfilePage extends State<ProfilePage>{
     String email = currentUser.email;
     QueryDocumentSnapshot documentSnapshot;
     GetInfo(documentSnapshot);
+    OutlinedButton editButton;
     return StreamBuilder(
       stream: FirebaseFirestore.instance.collection('users').doc(profileId).snapshots(),
       builder: (context, snapshot) {
+        if(profileId == currentUser.email){
+          editButton = OutlinedButton(
+            child: const Text('Edit Profile'),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return ProfileEdit();
+                }),
+              );
+            },
+          );
+        }else{
+          if(snapshot.data["followers"]){
+            editButton = OutlinedButton(
+              child: const Text('Remove'),
+              onPressed: () {
+                unfollowUser();
+              },
+            );
+          }else if (!snapshot.data['followers']){
+            editButton = OutlinedButton(
+              child: const Text('Follow'),
+              onPressed: () {
+                followUser();
+              },
+            );
+          }
+        }
         if (snapshot.data['followers']) {
           return Scaffold(
             appBar: AppBar(
@@ -190,25 +219,16 @@ class _ProfilePage extends State<ProfilePage>{
                   ),
                 ),
                 Text(snapshot.data['text']),
-                RaisedButton(
+                /*RaisedButton(
                   child: const Text('Remove'),
                   color: Colors.red,
                   shape: const StadiumBorder(),
                   onPressed: () {
                     unfollowUser();
                   },
-                ),
+                ),*/
                 Text(snapshot.data['msg']),
-                OutlinedButton(
-                  child: const Text('Edit Profile'),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) {
-                        return ProfileEdit();
-                      }),
-                    );
-                  },
-                ),
+                editButton,
               ],
             ),
           );
@@ -219,32 +239,23 @@ class _ProfilePage extends State<ProfilePage>{
               title: Text('プロフィール'),
             ),
             body: Row(
-              children: <Widget>[
+              children: [
                 CircleAvatar(
                   backgroundImage: NetworkImage(
                       snapshot.data['photoUrl']
                   ),
                 ),
                 Text(snapshot.data['text']),
-                RaisedButton(
+                /*RaisedButton(
                   child: const Text('Follow'),
                   color: Colors.red,
                   shape: const StadiumBorder(),
                   onPressed: () {
                     followUser();
                   },
-                ),
+                ),*/
                 Text(snapshot.data['msg']),
-                OutlinedButton(
-                  child: const Text('Edit Profile'),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) {
-                        return ProfileEdit();
-                      }),
-                    );
-                  },
-                ),
+                editButton,
               ],
             ),
           );

@@ -44,7 +44,9 @@ class _LoginPageState extends State<LoginPage> {
         'text': user.displayName,
         'email': user.email,
         'photoUrl': user.photoURL,
-        'followers': false
+        'following': false,
+        'followers': false,
+        'msg': ''
       });
 
       return user;
@@ -76,9 +78,6 @@ class _LoginPageState extends State<LoginPage> {
         'text': user.displayName,
         'email': user.email,
         'photoUrl': user.photoURL,
-        'following': false,
-        'followers': false,
-        'msg': ''
       });
 
       /*await FirebaseFirestore.instance
@@ -189,8 +188,8 @@ class _LoginPageState extends State<LoginPage> {
                       final User user = result.user;
 
                       FirebaseFirestore.instance.collection('users').doc(user.email).set({
-                            'id': user.email
-                          });
+                        'id': user.email
+                      });
                       // ログインに成功した場合
                       // チャット画面に遷移＋ログイン画面を破棄
                       await Navigator.of(context).pushReplacement(

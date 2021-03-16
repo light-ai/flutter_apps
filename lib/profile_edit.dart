@@ -32,32 +32,52 @@ class _ProfileEditState extends State<ProfileEdit> {
           RaisedButton(
             child: const Text('編集完了'),
             onPressed: () {
-              FirebaseFirestore.instance.collection('users').doc(
-                  currentUser.email).update({
-                'msg': profileText,
-              });
-              return showDialog(
-                context: context,
-                builder: (context) {
-                  return CupertinoAlertDialog(
-                    title: Text('以下に編集したよ！'),
-                    content: Text(profileText),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text('ok!'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) {
-                              return ChatPage(currentUser);
-                            }),
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
+              if(profileText == null){
+                return showDialog(
+                  context: context,
+                  builder: (context) {
+                    return CupertinoAlertDialog(
+                      title: Text('入力値がありません'),
+                      content: Text("何か入力してください"),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: Text('すみませんでした'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }else {
+                FirebaseFirestore.instance.collection('users').doc(
+                    currentUser.email).update({
+                  'msg': profileText,
+                });
+                return showDialog(
+                  context: context,
+                  builder: (context) {
+                    return CupertinoAlertDialog(
+                      title: Text('以下に編集したよ！'),
+                      content: Text(profileText),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: Text('ok!'),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) {
+                                return ChatPage(currentUser);
+                              }),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
             splashColor: Colors.purple.shade50,
           ),

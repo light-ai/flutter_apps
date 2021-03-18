@@ -33,7 +33,7 @@ class _ProfileEditState extends State<ProfileEdit> {
             child: const Text('編集完了'),
             onPressed: () {
               FirebaseFirestore.instance.collection('users').doc(
-                  currentUser.email).update({
+                  currentUser.uid).update({
                 'msg': profileText,
               });
               if(profileText == null){
@@ -49,7 +49,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                           onPressed: () {
                             Navigator.pop(context);
                             FirebaseFirestore.instance.collection('users').doc(
-                                currentUser.email).update({
+                                currentUser.uid).update({
                               'msg': "",
                             });
                           },
@@ -60,7 +60,7 @@ class _ProfileEditState extends State<ProfileEdit> {
                 );
               }else {
                 FirebaseFirestore.instance.collection('users').doc(
-                    currentUser.email).update({
+                    currentUser.uid).update({
                   'msg': profileText,
                 });
                 return showDialog(

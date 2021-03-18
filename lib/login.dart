@@ -39,14 +39,15 @@ class _LoginPageState extends State<LoginPage> {
 
       await FirebaseFirestore.instance
           .collection('users') // コレクションID指定
-          .doc(user.email) // ドキュメントID自動生成
+          .doc(user.uid) // ドキュメントID自動生成
           .set({
+        'id': user.uid,
         'text': user.displayName,
         'email': user.email,
         'photoUrl': user.photoURL,
         'following': false,
         'followers': false,
-        'msg': ''
+        'msg': '',
       });
 
       return user;
@@ -73,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
 
       await FirebaseFirestore.instance
           .collection('users') // コレクションID指定
-          .doc(user.email) // ドキュメントID自動生成
+          .doc(user.uid) // ドキュメントID自動生成
           .update({
         'text': user.displayName,
         'email': user.email,

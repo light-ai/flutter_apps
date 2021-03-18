@@ -122,7 +122,7 @@ class ChatPage extends StatelessWidget {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (context) {
                                 // 引数からユーザー情報を渡す
-                                  return ProfilePage(document['email']);
+                                  return ProfilePage(document['id']);
                               }),
                             ),
                           },

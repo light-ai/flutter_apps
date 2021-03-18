@@ -62,6 +62,7 @@ class _AddPostPageState extends State<AddPostPage> {
                         .collection('posts') // コレクションID指定
                         .document() // ドキュメントID自動生成
                         .setData({
+                      'id': user.uid,
                       'text': messageText,
                       'email': email,
                       'date': date,
@@ -83,17 +84,17 @@ class _AddPostPageState extends State<AddPostPage> {
                 );
               },
               ),
-              FloatingActionButton(
+              /*FloatingActionButton(
                 heroTag: 'hero2',
                 onPressed: (){
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) {
                     // 引数からユーザー情報を渡す
-                    return ProfilePage(user.email);
+                    return ProfilePage(user.uid);
                   }),
                 );
               },
-              ),
+              ),*/
             ],
           ),
         ),

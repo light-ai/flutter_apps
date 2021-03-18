@@ -1,14 +1,10 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_app/login.dart';
+import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/profile_edit.dart';
 import 'package:flutter_app/user.dart';
-import 'package:flutter_app/user_model.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_app/calender.dart';
-import 'package:flutter_app/addPost.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(this.profileId);
@@ -19,24 +15,43 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePage extends State<ProfilePage>{
   _ProfilePage(this.profileId);
   String profileId;
-  bool isFollowing = false;
-  bool followButtonClicked = false;
+  bool isFollowing = true;
   ScheduleUser follow;
   User currentUser = FirebaseAuth.instance.currentUser;
 
+  Future<void> checkExistence() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(profileId)
+        .get();
+
+    final exists = await doc.data()['followers'].containsKey(currentUser.uid);
+    if(!exists){
+      final currentUserId = currentUser.uid;
+
+      await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+        'following.$profileId': false,
+      });
+
+      await FirebaseFirestore.instance.collection('users').doc(profileId).update({
+        'followers.$currentUserId': false
+      });
+      Future.delayed(Duration(seconds: 1),);
+    }
+  }
+
   followUser() {
-    final profileUserId = currentUser.email;
+    final currentUserId = currentUser.uid;
     setState(() {
-      this.isFollowing = true;
-      followButtonClicked = true;
+      //this.isFollowing = true;
     });
-    FirebaseFirestore.instance.collection('users').doc(currentUser.email).update({
-      'following': true,
+    FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+      'following.$profileId': true,
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
 
     FirebaseFirestore.instance.collection('users').doc(profileId).update({
-      'followers': true
+      'followers.$currentUserId': true
     });
 
     //updates activity feed
@@ -53,217 +68,102 @@ class _ProfilePage extends State<ProfilePage>{
     });*/
   }
 
-  followUsers() {
-    final profileUserId = currentUser.email;
-    print('following user');
-    setState(() {
-      this.isFollowing = true;
-      followButtonClicked = true;
-    });
-    FirebaseFirestore.instance.collection('users')
-        .doc(currentUser.email)
-        .set({
-      'following.$profileId': false,
-      //firestore plugin doesnt support deleting, so it must be nulled / falsed
-    });
-
-    FirebaseFirestore.instance.collection('users').doc(profileId).set({
-      'followers.$profileUserId': false
-    });
-  }
-
   unfollowUser() {
-    final profileUserId = currentUser.email;
+    final currentUserId = currentUser.uid;
     setState(() {
-      isFollowing = false;
-      followButtonClicked = true;
+      //isFollowing = true;
     });
-    FirebaseFirestore.instance.collection('users').doc(currentUser.email).update({
-      'following': false,
+    FirebaseFirestore.instance.collection('users').doc(currentUser.uid).update({
+      'following.$profileId': false,
       //firestore plugin doesnt support deleting, so it must be nulled / falsed
     });
 
     FirebaseFirestore.instance.collection('users').doc(profileId).update({
-      'followers': false
+      'followers.$currentUserId': false
     });
   }
 
-  unfollowUsers() {
-    final profileUserId = currentUser.email;
-    setState(() {
-      isFollowing = false;
-      followButtonClicked = true;
-    });
-    FirebaseFirestore.instance.collection('users').doc(currentUser.email).set({
-      'following.$profileId': false,
-      //firestore plugin doesnt support deleting, so it must be nulled / falsed
-    });
-
-    FirebaseFirestore.instance.collection('users').doc(profileId).set({
-      'followers.$profileUserId': false
-    });
-  }
-
-  void GetInfo(DocumentSnapshot documentSnapshot) async{
-    documentSnapshot = await FirebaseFirestore.instance.collection('users').doc(currentUser.email)/*.collection('follow').doc(profileId)*/.get();
-  }
-
-  /* Firestore.instance
-        .collection("users")
-        .document('profile')
-        .delete();*/
-
-  Follow(dynamic snapshot){
-    if (snapshot) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('プロフィール'),
-        ),
-        body: Row(
-          children: <Widget>[
-            CircleAvatar(
-              backgroundImage: NetworkImage(
-                  snapshot.data['photoUrl']
-              ),
-            ),
-            Text(snapshot.data['text']),
-            RaisedButton(
-              child: const Text('Remove'),
-              color: Colors.red,
-              shape: const StadiumBorder(),
-              onPressed: () {
-                unfollowUser();
-              },
-            ),
-          ],
-        ),
-      );
-    }
-    else if (!snapshot) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('プロフィール'),
-        ),
-        body: Row(
-          children: <Widget>[
-            CircleAvatar(
-              backgroundImage: NetworkImage(
-                  snapshot.data['photoUrl']
-              ),
-            ),
-            Text(snapshot.data['text']),
-            RaisedButton(
-              child: const Text('Follow'),
-              color: Colors.red,
-              shape: const StadiumBorder(),
-              onPressed: () {
-                followUser();
-              },
-            ),
-          ],
-        ),
-      );
-    }else{
-      return Center(
-        child: Text('読み込み中です'),
-      );
-    }
-  }
   @override
   Widget build(BuildContext context) {
-    String email = currentUser.email;
-    QueryDocumentSnapshot documentSnapshot;
-    GetInfo(documentSnapshot);
     OutlinedButton editButton;
+    checkExistence();
     return StreamBuilder(
       stream: FirebaseFirestore.instance.collection('users').doc(profileId).snapshots(),
       builder: (context, snapshot) {
-        if(profileId == currentUser.email){
-          editButton = OutlinedButton(
-            child: const Text('Edit Profile'),
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) {
-                  return ProfileEdit();
-                }),
-              );
-            },
-          );
-        }else{
-          if(snapshot.data["followers"]){
+        final currentUserId = currentUser.uid;
+
+        calender() {
+          if (snapshot.data['followers.$currentUserId']) {
+            return CalenderExample();
+          }else{
+            Text('フォローするとカレンダー見れます');
+            Icon(Icons.add_to_queue_sharp);
+          }
+        }
+
+        if(snapshot.hasData) {
+          if (profileId == currentUser.uid) {
             editButton = OutlinedButton(
-              child: const Text('Remove'),
+              child: const Text('Edit Profile'),
               onPressed: () {
-                unfollowUser();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) {
+                    return ProfileEdit();
+                  }),
+                );
               },
             );
-          }else if (!snapshot.data['followers']){
+          } else if (isFollowing) {
+            if (snapshot.data['followers.$currentUserId']) {
+              editButton = OutlinedButton(
+                child: const Text('Remove'),
+                onPressed: () {
+                  unfollowUser();
+                },
+              );
+            } else if (!snapshot.data['followers.$currentUserId']) {
+              editButton = OutlinedButton(
+                child: const Text('Follow'),
+                onPressed: () {
+                  followUser();
+                },
+              );
+            }
+          } else if (!isFollowing) {
             editButton = OutlinedButton(
-              child: const Text('Follow'),
+              child: const Text('Follows'),
               onPressed: () {
                 followUser();
               },
             );
           }
         }
-        if (snapshot.data['followers']) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('プロフィール'),
-            ),
-            body: Row(
-              children: <Widget>[
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                      snapshot.data['photoUrl']
-                  ),
-                ),
-                Text(snapshot.data['text']),
-                /*RaisedButton(
-                  child: const Text('Remove'),
-                  color: Colors.red,
-                  shape: const StadiumBorder(),
-                  onPressed: () {
-                    unfollowUser();
-                  },
-                ),*/
-                Text(snapshot.data['msg']),
-                editButton,
-              ],
-            ),
-          );
-        }
-        else if (!snapshot.data['followers']) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('プロフィール'),
-            ),
-            body: Row(
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('プロフィール'),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
               children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                      snapshot.data['photoUrl']
+                Center(
+                  child: Row(
+                    children: <Widget>[
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          snapshot.data['photoUrl'],
+                        ),
+                      ),
+                      Text(snapshot.data['text']),
+                      editButton,
+                    ],
                   ),
                 ),
-                Text(snapshot.data['text']),
-                /*RaisedButton(
-                  child: const Text('Follow'),
-                  color: Colors.red,
-                  shape: const StadiumBorder(),
-                  onPressed: () {
-                    followUser();
-                  },
-                ),*/
                 Text(snapshot.data['msg']),
-                editButton,
               ],
             ),
-          );
-        }else{
-          return Center(
-            child: Text('読み込み中です'),
-          );
-        }
+          ),
+        );
       },
     );
   }

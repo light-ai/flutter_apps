@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/chatPage.dart';
 import 'package:flutter_app/addPost.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // ログイン画面用Widget
 class LoginPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<FirebaseUser> _handleSignIn() async {
+  Future<User> _handleSignIn() async {
     GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
     try {
       if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
@@ -33,8 +34,21 @@ class _LoginPageState extends State<LoginPage> {
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
-      final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+      final User user = (await _auth.signInWithCredential(credential)).user;
       print("signed in " + user.displayName);
+
+      await FirebaseFirestore.instance
+          .collection('users') // コレクションID指定
+          .doc(user.uid) // ドキュメントID自動生成
+          .set({
+        'id': user.uid,
+        'text': user.displayName,
+        'email': user.email,
+        'photoUrl': user.photoURL,
+        'following': false,
+        'followers': false,
+        'msg': '',
+      });
 
       return user;
     } catch (e) {
@@ -43,7 +57,47 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void transitionNextPage(FirebaseUser user) {
+  Future<User> _handleSignIn2() async {
+    GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
+    try {
+      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
+      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signIn();
+      if (googleCurrentUser == null) return null;
+
+      GoogleSignInAuthentication googleAuth = await googleCurrentUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final User user = (await _auth.signInWithCredential(credential)).user;
+      print("signed in " + user.displayName);
+
+      await FirebaseFirestore.instance
+          .collection('users') // コレクションID指定
+          .doc(user.uid) // ドキュメントID自動生成
+          .update({
+        'text': user.displayName,
+        'email': user.email,
+        'photoUrl': user.photoURL,
+      });
+
+      /*await FirebaseFirestore.instance
+          .collection('users') // コレクションID指定
+          .doc(user.email)
+          .collection('follow')
+          .doc(user.email)
+          .set({
+
+      });*/
+
+      return user;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  void transitionNextPage(User user) {
     if (user == null) return;
 
     Navigator.push(context, MaterialPageRoute(builder: (context) =>
@@ -94,11 +148,15 @@ class _LoginPageState extends State<LoginPage> {
                     try {
                       // メール/パスワードでユーザー登録
                       final FirebaseAuth auth = FirebaseAuth.instance;
-                      final AuthResult result = await auth.createUserWithEmailAndPassword(
+                      final UserCredential result = await auth.createUserWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
-                      final FirebaseUser user = result.user;
+                      final User user = result.user;
+                      FirebaseFirestore.instance.collection('users').doc(user.email).set(
+                          {
+                            'id': user.email
+                          });
                       // ユーザー登録に成功した場合
                       // チャット画面に遷移＋ログイン画面を破棄
                       await Navigator.of(context).pushReplacement(
@@ -124,11 +182,15 @@ class _LoginPageState extends State<LoginPage> {
                     try {
                       // メール/パスワードでログイン
                       final FirebaseAuth auth = FirebaseAuth.instance;
-                      final AuthResult result = await auth.signInWithEmailAndPassword(
+                      final UserCredential result = await auth.signInWithEmailAndPassword(
                         email: email,
                         password: password,
                       );
-                      final FirebaseUser user = result.user;
+                      final User user = result.user;
+
+                      FirebaseFirestore.instance.collection('users').doc(user.email).set({
+                        'id': user.email
+                      });
                       // ログインに成功した場合
                       // チャット画面に遷移＋ログイン画面を破棄
                       await Navigator.of(context).pushReplacement(
@@ -147,11 +209,25 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 width: double.infinity,
                 // ユーザー登録ボタン
-                child:RaisedButton(
-                  child: Text('Sign in Google'),
+                child:ElevatedButton(
+                  child: Text('新規Sign in Google'),
                   onPressed: () {
                     _handleSignIn()
-                        .then((FirebaseUser user) =>
+                        .then((User user) =>
+                        transitionNextPage(user)
+                    )
+                        .catchError((e) => print(e));
+                  },
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                // ユーザー登録ボタン
+                child:ElevatedButton(
+                  child: Text('Sign in Google'),
+                  onPressed: () {
+                    _handleSignIn2()
+                        .then((User user) =>
                         transitionNextPage(user)
                     )
                         .catchError((e) => print(e));
@@ -160,76 +236,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  Future<FirebaseUser> _handleSignIn() async {
-    GoogleSignInAccount googleCurrentUser = _googleSignIn.currentUser;
-    try {
-      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signInSilently();
-      if (googleCurrentUser == null) googleCurrentUser = await _googleSignIn.signIn();
-      if (googleCurrentUser == null) return null;
-
-      GoogleSignInAuthentication googleAuth = await googleCurrentUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.getCredential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-      print("signed in " + user.displayName);
-
-      return user;
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  void transitionNextPage(FirebaseUser user) {
-    if (user == null) return;
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) =>
-        ChatPage(user)
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              RaisedButton(
-                child: Text('Sign in Google'),
-                onPressed: () {
-                  _handleSignIn()
-                      .then((FirebaseUser user) =>
-                      transitionNextPage(user)
-                  )
-                      .catchError((e) => print(e));
-                },
-              ),
-            ]
         ),
       ),
     );

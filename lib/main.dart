@@ -6,8 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/addPost.dart';
 import 'package:flutter_app/chatApp.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   // 最初に表示するWidget
   runApp(ChatApp());
 }

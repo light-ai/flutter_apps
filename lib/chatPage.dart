@@ -60,15 +60,11 @@ class ChatPage extends StatelessWidget {
           ),
         ],
         onTap: (int index) {
-          /*setState(
-                () {
-              _navIndex = index;
-              _label = _titles[index];
-            },
-          );*/
         },
+        
         /*currentIndex: _navIndex,*/
       ),
+
       body: Column(
         children: <Widget>[
           Container(

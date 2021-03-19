@@ -36,7 +36,6 @@ class _ProfilePage extends State<ProfilePage>{
       await FirebaseFirestore.instance.collection('users').doc(profileId).update({
         'followers.$currentUserId': false
       });
-      Future.delayed(Duration(seconds: 1),);
     }
   }
 
@@ -96,8 +95,12 @@ class _ProfilePage extends State<ProfilePage>{
           if (snapshot.data['followers.$currentUserId']) {
             return CalenderExample();
           }else{
-            Text('フォローするとカレンダー見れます');
-            Icon(Icons.add_to_queue_sharp);
+            return Column(
+              children: <Widget>[
+                Text('フォローするとカレンダー見れます'),
+                Icon(Icons.add_to_queue_sharp)
+              ],
+            );
           }
         }
 

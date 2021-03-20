@@ -18,10 +18,6 @@ class _SsState extends State<Ss> {
   @override
   Widget build(BuildContext context) {
     String userName = context.select<UserModel, String>((model) => model.userModel.name);
-    a() async{
-      final String userName = await context.select<UserModel, String>((model) => model.userModel.name);
-      return Text(userName);
-    }
 
     if(userName == null){
       return Center(
@@ -29,7 +25,7 @@ class _SsState extends State<Ss> {
       );
     }
     else if(userName != null){
-      return a();
+      return Text(userName);
     }
   }
 }

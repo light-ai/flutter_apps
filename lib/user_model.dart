@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_app/user.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_app/chatPage.dart';
+import 'package:provider/provider.dart';
 
-class UserModel{
+class UserModel extends ChangeNotifier{
   UserModel(this.user);
   final User user;
   ScheduleUser userModel;
@@ -14,5 +16,6 @@ class UserModel{
     final data = FirebaseFirestore.instance.collection('users').doc(currentUser.uid);
     final dataSnapshot = await data.get();
     this.userModel = ScheduleUser(dataSnapshot, this.user);
+    notifyListeners();
   }
 }

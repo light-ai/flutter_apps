@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
 import 'package:flutter_app/profile.dart';
+import 'package:flutter_app/ss.dart';
+import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/profile.dart';
@@ -83,6 +85,17 @@ class _AddPostPageState extends State<AddPostPage> {
                   }),
                 );
               },
+              ),
+              FloatingActionButton(
+                heroTag: 'hero2',
+                onPressed: (){
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) {
+                      // 引数からユーザー情報を渡す
+                      return Ss();
+                    }),
+                  );
+                },
               ),
               /*FloatingActionButton(
                 heroTag: 'hero2',

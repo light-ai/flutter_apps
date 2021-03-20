@@ -6,7 +6,7 @@ class ScheduleUser{
   ScheduleUser(DocumentSnapshot doc, this.user){
     this.id = doc.id;
     this.following = doc.data()['following.' + user.uid];
-    this.followed = doc.data()['followers'];
+    this.followed = doc.data()['followers' + user.uid];
     this.name = doc.data()['text'];
   }
   String id;

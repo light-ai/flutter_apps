@@ -104,19 +104,20 @@ class _ProfilePage extends State<ProfilePage>{
           }
         }
 
-        if(snapshot.hasData) {
-          if (profileId == currentUser.uid) {
-            editButton = OutlinedButton(
-              child: const Text('Edit Profile'),
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) {
-                    return ProfileEdit();
-                  }),
-                );
-              },
-            );
-          } else if (isFollowing) {
+        if (profileId == currentUser.uid) {
+          editButton = OutlinedButton(
+            child: const Text('Edit Profile'),
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) {
+                  return ProfileEdit();
+                }),
+              );
+            },
+          );
+        }
+        else if(snapshot.data['followers'].containsKey(currentUser.uid)) {
+          if (isFollowing) {
             if (snapshot.data['followers.$currentUserId']) {
               editButton = OutlinedButton(
                 child: const Text('Remove'),
@@ -132,9 +133,22 @@ class _ProfilePage extends State<ProfilePage>{
                 },
               );
             }
-          } else if (!isFollowing) {
+          }
+        }else if(!snapshot.data['followers'].containsKey(currentUser.uid)){
+          if (profileId == currentUser.uid) {
             editButton = OutlinedButton(
-              child: const Text('Follows'),
+              child: const Text('Edit Profile'),
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) {
+                    return ProfileEdit();
+                  }),
+                );
+              },
+            );
+          }else {
+            editButton = OutlinedButton(
+              child: const Text('Follow'),
               onPressed: () {
                 followUser();
               },

@@ -3,6 +3,7 @@ import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_app/user.dart';
 
 class Ss extends StatefulWidget {
   @override
@@ -10,22 +11,17 @@ class Ss extends StatefulWidget {
 }
 
 class _SsState extends State<Ss> {
-
-  a() async{
-    final String userName = await context.select<UserModel, String>((model) => model.userModel.name);
-    return Text(userName);
-  }
   @override
   Widget build(BuildContext context) {
-    String userName = context.select<UserModel, String>((model) => model.userModel.name);
+    ScheduleUser user = context.select<UserModel, ScheduleUser>((model) => model.userModel);
 
-    if(userName == null){
+    if(user.name == null){
       return Center(
         child: CircularProgressIndicator(),
       );
     }
-    else if(userName != null){
-      return Text(userName);
+    else if(user.name != null){
+      return Text(user.name);
     }
   }
 }

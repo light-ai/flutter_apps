@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
 import 'package:flutter_app/profile.dart';
+import 'package:flutter_app/schedule_post.dart';
 import 'package:flutter_app/ss.dart';
 import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
@@ -93,6 +94,17 @@ class _AddPostPageState extends State<AddPostPage> {
                     MaterialPageRoute(builder: (context) {
                       // 引数からユーザー情報を渡す
                       return Ss();
+                    }),
+                  );
+                },
+              ),
+              FloatingActionButton(
+                heroTag: 'hero3',
+                onPressed: (){
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) {
+                      // 引数からユーザー情報を渡す
+                      return SchedulePost();
                     }),
                   );
                 },

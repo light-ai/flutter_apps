@@ -91,7 +91,7 @@ class _ProfilePage extends State<ProfilePage>{
       builder: (context, snapshot) {
         final currentUserId = currentUser.uid;
 
-        calender() {
+        /*calender() {
           if (snapshot.data['followers.$currentUserId']) {
             return CalenderExample();
           }else{
@@ -102,7 +102,7 @@ class _ProfilePage extends State<ProfilePage>{
               ],
             );
           }
-        }
+        }*/
 
         if (profileId == currentUser.uid) {
           editButton = OutlinedButton(

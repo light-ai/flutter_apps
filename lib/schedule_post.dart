@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/calender.dart';
+import 'package:flutter_app/schedule_model.dart';
 import 'package:flutter_app/time_picker.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -7,13 +9,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SchedulePost extends StatefulWidget {
+  SchedulePost(this.date);
+  String date;
   @override
   State<StatefulWidget> createState() {
-    return _SchedulePostState();
+    return _SchedulePostState(this.date);
   }
 }
 
 class _SchedulePostState extends State<SchedulePost> {
+  _SchedulePostState(this.date);
+  String date;
   var _labelText = 'Select Date';
   final _controller = TimePickerController();
   String messageText = '';
@@ -82,15 +88,17 @@ class _SchedulePostState extends State<SchedulePost> {
                   textColor: Colors.white,
                   child: Text('保存'),
                   onPressed: () async {
-                    final date =
+                    date =
                     DateTime.now().toLocal().toIso8601String(); // 現在の日時
                     final email = currentUser.email; // AddPostPage のデータを参照
+                    ScheduleModel(date);
+                    CalenderExample(date);
                     // 投稿メッセージ用ドキュメント作成
                     await Firestore.instance
                         .collection('users') // コレクションID指定
                         .doc(currentUser.uid)
                         .collection('schedule')
-                        .doc()
+                        .doc(this.date)
                         .set({
                       'text': messageText,
                       'year': _labelText,

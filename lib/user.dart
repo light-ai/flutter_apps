@@ -13,5 +13,4 @@ class ScheduleUser{
   String name;
   bool following;
   bool followed;
-
 }

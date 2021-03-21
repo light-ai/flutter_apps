@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/login.dart';
+import 'package:flutter_app/schedule_model.dart';
 import 'package:flutter_app/user_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/calender.dart';
@@ -18,12 +19,16 @@ void main() async{
 
 class MyApp extends StatelessWidget {
   User user = FirebaseAuth.instance.currentUser;
+  String date;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<UserModel>(
           create: (context) => UserModel(user)..fetchUser(),
+        ),
+        ChangeNotifierProvider<ScheduleModel>(
+          create: (context) => ScheduleModel(date)..fetchSchedule(),
         ),
       ],
       child: MaterialApp(

@@ -23,6 +23,8 @@ class AddPostPage extends StatefulWidget {
 class _AddPostPageState extends State<AddPostPage> {
   _AddPostPageState(this.user);
   final User user;
+  DateTime da;
+  String date;
   // 入力した投稿メッセージ
   String messageText = '';
   @override
@@ -57,7 +59,7 @@ class _AddPostPageState extends State<AddPostPage> {
                   textColor: Colors.white,
                   child: Text('投稿'),
                   onPressed: () async {
-                    final date =
+                    date =
                     DateTime.now().toLocal().toIso8601String(); // 現在の日時
                     final email = widget.user.email; // AddPostPage のデータを参照
                     // 投稿メッセージ用ドキュメント作成
@@ -82,7 +84,7 @@ class _AddPostPageState extends State<AddPostPage> {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) {
                     // 引数からユーザー情報を渡す
-                    return CalenderExample();
+                    return CalenderExample(date);
                   }),
                 );
               },
@@ -104,7 +106,7 @@ class _AddPostPageState extends State<AddPostPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) {
                       // 引数からユーザー情報を渡す
-                      return SchedulePost();
+                      return SchedulePost(date);
                     }),
                   );
                 },

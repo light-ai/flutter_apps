@@ -13,59 +13,68 @@ class SchedulePage extends StatelessWidget {
   String date;
   @override
   Widget build(BuildContext context) {
-    Schedule schedule = context.select<ScheduleModel, Schedule>((model) => model.schedule);
-    if(schedule.date.isNotEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Calender Example"),
-        ),
-        body: Row(
-          children: [
-            Column(
-              children: [
-                  Text(schedule.year),
-                  Text(schedule.day),
-                  Text(schedule.scheduleMessage),
-              ],
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: (){
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) {
-                // 引数からユーザー情報を渡す
-                return SchedulePost(this.date);
-              }),
+    User currentUser = FirebaseAuth.instance.currentUser;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('スケジュール'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        // 投稿メッセージ一覧を取得（非同期処理）
+        // 投稿日時でソート
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(date)
+              .collection('schedule')
+              .orderBy('year')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final List<DocumentSnapshot> documents =
+                  snapshot.data.docs;
+              // 取得した投稿メッセージ一覧を元にリスト表示
+              return ListView(
+                children: documents.map((document) {
+                  IconButton deleteIcon;
+                  // 自分の投稿メッセージの場合は削除ボタンを表示
+                  /*if (document['email'] == user.email) {
+                  deleteIcon = IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      // 投稿メッセージのドキュメントを削除
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(currentUser.uid)
+                          .collection('schedule')
+                          .doc(date)
+                          .delete();
+                    },
+                  );
+                }*/
+                  return Card(
+                    child:
+                    ListTile(
+                      //trailing: deleteIcon,
+                      title: Text(document['year'] + '  ' + document['day']),
+                      subtitle: Text(document['text']),
+                      onTap: () => {
+                        /*Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) {
+                          // 引数からユーザー情報を渡す
+                          return ProfilePage(document['id']);
+                        }),
+                      ),*/
+                      },
+                    ),
+                  );
+                }).toList(),
+              );
+            }
+            // データが読込中の場合
+            return Center(
+              child: Text('読込中...'),
             );
-          },
-        ),
-      );
-    }else if(schedule.date.isEmpty){
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Calender Example"),
-        ),
-        body: Row(
-          children: [
-            Column(
-              children: [
-
-              ],
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: (){
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) {
-                // 引数からユーザー情報を渡す
-                return SchedulePost(this.date);
-              }),
-            );
-          },
-        ),
-      );
-    }
+          }
+      ),
+    );
   }
 }

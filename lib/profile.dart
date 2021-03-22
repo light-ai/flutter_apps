@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/calender.dart';
 import 'package:flutter_app/profile_edit.dart';
 import 'package:flutter_app/user.dart';
+import 'package:flutter_app/schedulePage.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(this.profileId);
@@ -177,6 +178,15 @@ class _ProfilePage extends State<ProfilePage>{
                   ),
                 ),
                 Text(snapshot.data['msg']),
+                OutlinedButton(
+                  child: const Text('View Schedule'),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) {
+                        return SchedulePage(profileId);
+                      }),
+                    );
+                  },),
               ],
             ),
           ),

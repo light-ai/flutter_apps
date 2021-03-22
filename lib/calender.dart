@@ -3,6 +3,9 @@ import 'package:flutter_app/schedulePage.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
+import 'package:flutter_app/schedule_model.dart';
+import 'package:flutter_app/schedule.dart';
+import 'package:provider/provider.dart';
 
 class CalenderExample extends StatefulWidget {
   CalenderExample(this.date);
@@ -17,18 +20,68 @@ class _CalenderExampleState extends State<CalenderExample> {
   _CalenderExampleState(this.date);
   String _currentDate = DateTime.now().toString();
   String date;
+  DateTime time = DateTime.now();
 
-  void onDayPressed(DateTime date, List<Event> events) {
-    String year = date.year.toString();
-    String month = date.month.toString();
-    String day = date.day.toString();
-    this.setState(() => _currentDate = year + '-' + month + '-' + day);
-    /*Navigator.of(context).push(
+  void onDayPressed(DateTime dates, List<Event> events) {
+    //Schedule schedule = context.select<ScheduleModel, Schedule>((model) => model.schedule);
+
+    String monthDecide(){
+      String monthEnglish;
+      if(dates.month == 1){
+        monthEnglish = "Jan";
+      }else if(dates.month == 2){
+        monthEnglish = "Feb";
+      }
+      else if(dates.month == 3){
+        monthEnglish = "Mar";
+      }
+      else if(dates.month == 4){
+        monthEnglish = "Apr";
+      }
+      else if(dates.month == 5){
+        monthEnglish = "May";
+      }
+      else if(dates.month == 6){
+        monthEnglish = "Jun";
+      }
+      else if(dates.month == 7){
+        monthEnglish = "Jul";
+      }
+      else if(dates.month == 8){
+        monthEnglish = "Aug";
+      }
+      else if(dates.month == 9){
+        monthEnglish = "Sep";
+      }
+      else if(dates.month == 10){
+        monthEnglish = "Oct";
+      }
+      else if(dates.month == 11){
+        monthEnglish = "Nov";
+      }
+      else if(dates.month == 12){
+        monthEnglish = "Dec";
+      }
+      return monthEnglish;
+    }
+
+    String year = dates.year.toString();
+    String month = dates.month.toString();
+    String day = dates.day.toString();
+    String monthEnglish = monthDecide();
+
+    this.setState(() => {
+      _currentDate =  monthEnglish + " " + day + ", " + year,
+      time = dates,
+    },
+    );
+    Navigator.of(context).push(
       MaterialPageRoute(builder: (context) {
         // 引数からユーザー情報を渡す
-        return SchedulePage(this.date);
+        ScheduleModel(_currentDate);
+        return SchedulePage(_currentDate);
       }),
-    );*/
+    );
     print(_currentDate);
   }
 
@@ -45,7 +98,7 @@ class _CalenderExampleState extends State<CalenderExample> {
               thisMonthDayBorderColor: Colors.grey,
               weekFormat: false,
               height: 420.0,
-              //selectedDateTime: _currentDate,
+              selectedDateTime: time,
               daysHaveCircularBorder: false,
               customGridViewPhysics: NeverScrollableScrollPhysics(),
               markedDateShowIcon: true,

@@ -91,14 +91,14 @@ class _SchedulePostState extends State<SchedulePost> {
                     date =
                     DateTime.now().toLocal().toIso8601String(); // 現在の日時
                     final email = currentUser.email; // AddPostPage のデータを参照
-                    ScheduleModel(date);
-                    CalenderExample(date);
+                    ScheduleModel(_labelText);
+                    CalenderExample(_labelText);
                     // 投稿メッセージ用ドキュメント作成
-                    await Firestore.instance
+                    await FirebaseFirestore.instance
                         .collection('users') // コレクションID指定
                         .doc(currentUser.uid)
                         .collection('schedule')
-                        .doc(this.date)
+                        .doc(_labelText)
                         .set({
                       'text': messageText,
                       'year': _labelText,

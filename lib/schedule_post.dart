@@ -98,12 +98,13 @@ class _SchedulePostState extends State<SchedulePost> {
                         .collection('users') // コレクションID指定
                         .doc(currentUser.uid)
                         .collection('schedule')
-                        .doc(_labelText)
+                        .doc()
                         .set({
                       'text': messageText,
                       'year': _labelText,
                       'day': "${_controller.hour} : ${_controller.minute}",
                       'date': date,
+                      'email': currentUser.email
                     });
                     // 1つ前の画面に戻る
                     Navigator.of(context).pop();

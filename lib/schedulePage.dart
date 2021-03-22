@@ -36,7 +36,7 @@ class SchedulePage extends StatelessWidget {
                 children: documents.map((document) {
                   IconButton deleteIcon;
                   // 自分の投稿メッセージの場合は削除ボタンを表示
-                  /*if (document['email'] == user.email) {
+                  if (document['email'] == currentUser.email) {
                   deleteIcon = IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
@@ -45,15 +45,15 @@ class SchedulePage extends StatelessWidget {
                           .collection('users')
                           .doc(currentUser.uid)
                           .collection('schedule')
-                          .doc(date)
+                          .doc(document.id)
                           .delete();
                     },
                   );
-                }*/
+                }
                   return Card(
                     child:
                     ListTile(
-                      //trailing: deleteIcon,
+                      trailing: deleteIcon,
                       title: Text(document['year'] + '  ' + document['day']),
                       subtitle: Text(document['text']),
                       onTap: () => {
